@@ -30,6 +30,25 @@ struct sondeaprs_SDRBLOCK {
    char valid;
 };
 
+struct sondeaprs_EXTDATA;
+
+
+struct sondeaprs_EXTDATA {
+   int32_t fstate;    /* -1=unknown, 0=ground, 1=flight, 2=descent */
+   int32_t bk;        /* burst-kill armed: 0 or 1 */
+   double tmphum;     /* humidity sensor temperature (X2C_max_real if N/A) */
+   double ozonExtV;   /* ozone external voltage (0 if N/A) */
+   int32_t mesok;     /* RS92: -1=unknown, 0=sensors cold, 1=sensors warm */
+   int32_t ozonInstType; /* iMET: ozone instrument type, -1=unknown */
+   int32_t ozonInstNum;  /* iMET: ozone instrument number, -1=unknown */
+   double imetTi;     /* iMET: internal temp (X2C_max_real if N/A) */
+   double imetTp;     /* iMET: probe temp (X2C_max_real if N/A) */
+   double imetTu;     /* iMET: unknown temp (X2C_max_real if N/A) */
+   double dewp;       /* C34: dew point (X2C_max_real if N/A) */
+};
+
+extern struct sondeaprs_EXTDATA sondeaprs_extdata;
+
 #define sondeaprs_VERSION "sondemod 1.37b"
 
 #define sondeaprs_minusG "G"

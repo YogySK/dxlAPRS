@@ -64,6 +64,8 @@ struct aprsstr_POSITION sondeaprs_mypos;
 float sondeaprs_myalt;
 
 
+struct sondeaprs_EXTDATA sondeaprs_extdata = {-1L, 0L, 0.0, 0.0, -1L, -1L, -1L, 0.0, 0.0, 0.0, 0.0};
+
 struct sondeaprs__D2 sondeaprs_beacontimes[20];
 
 
@@ -236,7 +238,8 @@ static void wrcsv(uint32_t sattime, const char typstr[],
                 sondeaprs_pSATSIG psatsig, const char user[],
                 uint32_t user_len, int32_t leapsecs,
                 const struct sondeaprs_XDATA xdatas, const char ogstr[],
-                uint32_t ogstr_len)
+                uint32_t ogstr_len, uint32_t calperc, double hrms,
+                double vrms)
 {
    int32_t fd;
    uint32_t j;
@@ -341,6 +344,34 @@ static void wrcsv(uint32_t sattime, const char typstr[],
          aprsstr_IntToStr((int32_t)txpower, 2UL, h, 1000ul);
          aprsstr_Append(s, 1000ul, h, 1000ul);
       }
+      if (calperc>0UL) {
+         aprsstr_Append(s, 1000ul, ",\"cal\":", 8ul);
+         aprsstr_IntToStr((int32_t)calperc, 1UL, h, 1000ul);
+         aprsstr_Append(s, 1000ul, h, 1000ul);
+      }
+      if (hrms>0.01) {
+         aprsstr_Append(s, 1000ul, ",\"hrms\":", 9ul);
+         aprsstr_FixToStr((float)hrms, 2UL, h, 1000ul);
+         aprsstr_Append(s, 1000ul, h, 1000ul);
+      }
+      if (vrms>0.01) {
+         aprsstr_Append(s, 1000ul, ",\"vrms\":", 9ul);
+         aprsstr_FixToStr((float)vrms, 2UL, h, 1000ul);
+         aprsstr_Append(s, 1000ul, h, 1000ul);
+      }
+      if (sondeaprs_extdata.fstate>=0L) {
+         aprsstr_Append(s, 1000ul, ",\"fstate\":", 11ul);
+         aprsstr_IntToStr(sondeaprs_extdata.fstate, 1UL, h, 1000ul);
+         aprsstr_Append(s, 1000ul, h, 1000ul);
+      }
+      if (sondeaprs_extdata.bk) {
+         aprsstr_Append(s, 1000ul, ",\"bk\":1", 8ul);
+      }
+      if (sondeaprs_extdata.mesok>=0L) {
+         aprsstr_Append(s, 1000ul, ",\"mesok\":", 10ul);
+         aprsstr_IntToStr(sondeaprs_extdata.mesok, 1UL, h, 1000ul);
+         aprsstr_Append(s, 1000ul, h, 1000ul);
+      }
       if (temp>(-1000.0) && temp<1000.0) {
          aprsstr_Append(s, 1000ul, ",\"ptu\":{\"t\":", 13ul);
          aprsstr_FixToStr((float)temp, 3UL, h, 1000ul);
@@ -353,6 +384,40 @@ static void wrcsv(uint32_t sattime, const char typstr[],
          if (hyg>0.1 && hyg<=100.0) {
             aprsstr_Append(s, 1000ul, ",\"h\":", 6ul);
             aprsstr_FixToStr((float)hyg, 2UL, h, 1000ul);
+            aprsstr_Append(s, 1000ul, h, 1000ul);
+         }
+         if (sondeaprs_extdata.tmphum>(-100.0)
+                   && sondeaprs_extdata.tmphum<100.0) {
+            aprsstr_Append(s, 1000ul, ",\"th\":", 7ul);
+            aprsstr_FixToStr((float)sondeaprs_extdata.tmphum, 3UL, h,
+                1000ul);
+            aprsstr_Append(s, 1000ul, h, 1000ul);
+         }
+         if (sondeaprs_extdata.dewp>(-100.0)
+                   && sondeaprs_extdata.dewp<100.0) {
+            aprsstr_Append(s, 1000ul, ",\"dewp\":", 9ul);
+            aprsstr_FixToStr((float)sondeaprs_extdata.dewp, 2UL, h, 1000ul);
+            aprsstr_Append(s, 1000ul, h, 1000ul);
+         }
+         if (sondeaprs_extdata.imetTi>(-100.0)
+                   && sondeaprs_extdata.imetTi<100.0) {
+            aprsstr_Append(s, 1000ul, ",\"ti\":", 7ul);
+            aprsstr_FixToStr((float)sondeaprs_extdata.imetTi, 2UL, h,
+                1000ul);
+            aprsstr_Append(s, 1000ul, h, 1000ul);
+         }
+         if (sondeaprs_extdata.imetTp>(-100.0)
+                   && sondeaprs_extdata.imetTp<100.0) {
+            aprsstr_Append(s, 1000ul, ",\"tp\":", 7ul);
+            aprsstr_FixToStr((float)sondeaprs_extdata.imetTp, 2UL, h,
+                1000ul);
+            aprsstr_Append(s, 1000ul, h, 1000ul);
+         }
+         if (sondeaprs_extdata.imetTu>(-100.0)
+                   && sondeaprs_extdata.imetTu<100.0) {
+            aprsstr_Append(s, 1000ul, ",\"tu\":", 7ul);
+            aprsstr_FixToStr((float)sondeaprs_extdata.imetTu, 2UL, h,
+                1000ul);
             aprsstr_Append(s, 1000ul, h, 1000ul);
          }
          aprsstr_Append(s, 1000ul, "}", 2ul);
@@ -370,6 +435,23 @@ static void wrcsv(uint32_t sattime, const char typstr[],
          aprsstr_Append(s, 1000ul, ",\"pumpv\":", 10ul);
          aprsstr_FixToStr((float)pumpv, 3UL, h, 1000ul);
          aprsstr_Append(s, 1000ul, h, 1000ul);
+         if (sondeaprs_extdata.ozonExtV>0.01) {
+            aprsstr_Append(s, 1000ul, ",\"extv\":", 9ul);
+            aprsstr_FixToStr((float)sondeaprs_extdata.ozonExtV, 2UL, h,
+                1000ul);
+            aprsstr_Append(s, 1000ul, h, 1000ul);
+         }
+         if (sondeaprs_extdata.ozonInstType>=0L) {
+            aprsstr_Append(s, 1000ul, ",\"otyp\":", 9ul);
+            aprsstr_IntToStr(sondeaprs_extdata.ozonInstType, 1UL, h,
+                1000ul);
+            aprsstr_Append(s, 1000ul, h, 1000ul);
+         }
+         if (sondeaprs_extdata.ozonInstNum>=0L) {
+            aprsstr_Append(s, 1000ul, ",\"onum\":", 9ul);
+            aprsstr_IntToStr(sondeaprs_extdata.ozonInstNum, 1UL, h, 1000ul);
+            aprsstr_Append(s, 1000ul, h, 1000ul);
+         }
          aprsstr_Append(s, 1000ul, "}", 2ul);
       }
       if (sdr.freq) {
@@ -1844,7 +1926,8 @@ extern void sondeaprs_senddata(double lat, double long0,
                 alt, speed, dir, clb, altNN, og, mhz, goodsats, uptime, hp,
                 hyg, temp, ozon, otemp, pumpmA, pumpv, sdr, mydist, myazi,
                 myele, fullid, fullid_len, txpower, vBatt, txtime, psatsig,
-                usercall, usercall_len, leapsecs, xdata, ogwhat, 251ul);
+                usercall, usercall_len, leapsecs, xdata, ogwhat, 251ul,
+                calperc, hrms, vrms);
    }
    if (aprsstr_Length(usercall, usercall_len)<3UL) {
       osi_WrStrLn("no tx without <mycall>", 23ul);

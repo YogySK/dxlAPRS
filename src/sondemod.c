@@ -231,6 +231,11 @@ struct CONTEXTDFM6 {
    uint32_t lastfrid;
    uint32_t nameregtop;
    struct DFNAMES namereg[50];
+   /* PTU measurement array (fl24 decoded, conf_id 0-8) */
+   double meas24[9];
+   uint16_t raw16[9]; /* raw middle-16-bit values per conf_id */
+   uint8_t cfgchk24[9];
+   uint8_t sn_ch; /* serial/type nibble: 6=DFM06, 7=PS15, A=DFM09, B=DFM17 */
 };
 /* new df serial */
 
@@ -2121,11 +2126,10 @@ static void decodeframe(uint8_t m, uint32_t ip, uint32_t fromport)
       }
    }
    loop_exit:;
-   if (((((contextr9.posok && calok) && almread+60UL>systime)
+   if ((((calok && almread+60UL>systime)
                 && (((sendquick==2UL || sondeaprs_nofilter)
                 || contextr9.calibok==0xFFFFFFFFUL)
-                || (contextr9.calibok&0x1UL)!=0UL && sendquick==1UL))
-                && contextr9.lat!=0.0) && contextr9.long0!=0.0) {
+                || (contextr9.calibok&0x1UL)!=0UL && sendquick==1UL)))) {
       { /* with */
          struct CONTEXTR9 * anonym1 = &contextr9;
          if (!anonym1->mesok || anonym1->calibok!=0xFFFFFFFFUL) {
@@ -2133,6 +2137,19 @@ static void decodeframe(uint8_t m, uint32_t ip, uint32_t fromport)
             anonym1->hyg = 0.0;
             anonym1->temp = (double)X2C_max_real;
          }
+         /* set RS92-specific extended data */
+         sondeaprs_extdata.mesok = anonym1->mesok ? 1L : 0L;
+         /* reset non-RS92 extended data */
+         sondeaprs_extdata.fstate = -1L;
+         sondeaprs_extdata.bk = 0L;
+         sondeaprs_extdata.tmphum = (double)X2C_max_real;
+         sondeaprs_extdata.ozonExtV = 0.0;
+         sondeaprs_extdata.ozonInstType = -1L;
+         sondeaprs_extdata.ozonInstNum = -1L;
+         sondeaprs_extdata.imetTi = (double)X2C_max_real;
+         sondeaprs_extdata.imetTp = (double)X2C_max_real;
+         sondeaprs_extdata.imetTu = (double)X2C_max_real;
+         sondeaprs_extdata.dewp = (double)X2C_max_real;
          sondeaprs_senddata(anonym1->lat, anonym1->long0, anonym1->heig,
                 anonym1->speed, anonym1->dir, anonym1->climb, 0.0,
                 anonym1->hyg, anonym1->temp, anonym1->ozon,
@@ -2515,15 +2532,17 @@ static void decodec34(const char rxb[], uint32_t rxb_len,
             pc->ttemp = systime;
          }
          break;
+      case '\007':
+         if (hr<99.9 && hr>(-99.9)) {
+            if (sondeaprs_verb) {
+               osi_WrStr("dewp ", 6ul);
+               osic_WrFixed((float)hr, 1L, 0UL);
+               osi_WrStr("oC", 3ul);
+            }
+            sondeaprs_extdata.dewp = hr;
+         }
+         break;
       case '\024':
-         /*
-              |CHR(07H): IF (hr<99.9) & (hr>-99.9) THEN 
-                           IF verb THEN WrStr("dewp "); WrFixed(hr, 1, 0);
-                WrStr("oC"); END;
-                           pc^.dewp:=hr;
-                           pc^.tdewp:=systime;
-                         END;
-         */
          pc->gpsdate = unixdate(2000UL+val%100UL, (val/100UL)%100UL,
                 (val/10000UL)%100UL);
          if (sondeaprs_verb) {
@@ -2656,6 +2675,11 @@ static void decodec34(const char rxb[], uint32_t rxb_len,
             if (c50) strncpy(tstr,"SRSC50",51u);
             else strncpy(tstr,"SRSC34",51u);
             xdatablock.cnt = 0UL;
+            /* reset extended data (C34/C50, not RS41) */
+            sondeaprs_extdata.fstate = -1L;
+            sondeaprs_extdata.bk = 0L;
+            sondeaprs_extdata.tmphum = (double)X2C_max_real;
+            sondeaprs_extdata.ozonExtV = 0.0;
             sondeaprs_senddata(exlat, exlon, anonym2->alt, anonym2->speed,
                 anonym2->dir, anonym2->clmb, 0.0, shum, stemp, 0.0, 0.0, 0.0,
                  0.0, (double) -(float)(uint32_t)sendmhzfromsdr,
@@ -2970,6 +2994,7 @@ static void getdfserial(const char rxb[], uint32_t rxb_len,
       }
       if (max0>2U && anonym->namereg[v].errcnt==0U) {
          /* may be good enough */
+         anonym->sn_ch = (uint8_t)(anonym->namereg[v].start/16U);
          aprsstr_Assign(ser, ser_len, "[  ]", 5ul);
          ser[1UL] = hex((uint32_t)(anonym->namereg[v].start/16U));
          ser[2UL] = hex((uint32_t)anonym->namereg[v].start);
@@ -3100,6 +3125,24 @@ static void decodedfm6(const char rxb[], uint32_t rxb_len,
       pc->actrt = rt;
       pc->posok = 0;
       getdfserial(rxb, rxb_len, i, pc, ser, 16ul, typstr, 9ul);
+      /* extract CFG measurement for PTU */
+      {
+         uint32_t conf_id = (uint32_t)(uint8_t)rxb[i]&0x0FUL;
+         if (conf_id<=8UL) {
+            uint32_t val24 = (((uint32_t)(uint8_t)rxb[i]>>4)<<20)
+                           | ((uint32_t)(uint8_t)rxb[i+1UL]<<12)
+                           | ((uint32_t)(uint8_t)rxb[i+2UL]<<4)
+                           | ((uint32_t)(uint8_t)rxb[i+3UL]>>4);
+            uint32_t pp = (val24>>20)&0xFUL;
+            uint32_t mantissa = val24&0xFFFFFUL;
+            if (pp<20UL) {
+               pc->meas24[conf_id] = (double)mantissa/(double)(1UL<<pp);
+               pc->cfgchk24[conf_id] = 1;
+            }
+            pc->raw16[conf_id] = (uint16_t)((uint32_t)(uint8_t)rxb[i+1UL]*256UL
+                               +(uint32_t)(uint8_t)rxb[i+2UL]);
+         }
+      }
       i += 4UL;
       for (j = 0UL; j<=6UL; j++) {
          for (ib = 0UL; ib<=7UL; ib++) {
@@ -3141,13 +3184,71 @@ static void decodedfm6(const char rxb[], uint32_t rxb_len,
                osi_WrStrLn(")", 2ul);
             }
             if ((lonok && latok) && (pc->poserr==0UL || sondeaprs_nofilter)) {
+               double dfm_temp = (double)X2C_max_real;
+               double dfm_batt = 0.0;
+               /* DFM PTU temperature from NTC thermistor */
+               {
+                  uint8_t sn = pc->sn_ch;
+                  char psen = 0;
+                  /* P-sensor detection: DFM-09P/DFM-17P shift measurement indices */
+                  if (sn>=0xDU || (sn>=0xCU && pc->cfgchk24[6]
+                        && pc->meas24[6]<220000.0)) psen = 1;
+                  if (sn!=7U && sn!=0U) {
+                     /* not PS-15 and type known */
+                     int cfgok = pc->cfgchk24[0] && pc->cfgchk24[1]
+                        && pc->cfgchk24[2] && pc->cfgchk24[3]
+                        && pc->cfgchk24[4] && pc->cfgchk24[5];
+                     if (sn!=6U) cfgok = cfgok && pc->cfgchk24[6]
+                        && pc->cfgchk24[7];
+                     if (cfgok) {
+                        uint32_t ofs = psen ? 1UL : 0UL;
+                        double Rf = (sn==0xBU || sn==0xDU
+                           || (sn==0xCU && !psen)) ? 332000.0 : 220000.0;
+                        double f  = pc->meas24[0UL+ofs];
+                        double f1 = pc->meas24[3UL+ofs*2UL];
+                        double f2 = pc->meas24[4UL+ofs*2UL];
+                        double g = f2/Rf;
+                        if (g!=0.0) {
+                           double R = (f-f1)/g;
+                           if (R>0.0) {
+                              double lnR = log(R);
+                              double T = 1.0/(1.07303516e-03
+                                 +2.41296733e-04*lnR
+                                 +2.26744154e-06*lnR*lnR
+                                 +6.52855181e-08*lnR*lnR*lnR);
+                              T -= 273.15;
+                              if (T>(-120.0) && T<60.0) dfm_temp = T;
+                           }
+                        }
+                     }
+                     /* DFM battery voltage (DFM-09+, raw 16-bit / 1000) */
+                     if (sn>=0xAU) {
+                        uint32_t bch = psen ? 7UL : 5UL;
+                        if (pc->cfgchk24[bch]) {
+                           dfm_batt = (double)pc->raw16[bch]/1000.0;
+                        }
+                     }
+                  }
+               }
                xdatablock.cnt = 0UL;
+               /* reset extended data (DFM6, not RS41) */
+               sondeaprs_extdata.fstate = -1L;
+               sondeaprs_extdata.bk = 0L;
+               sondeaprs_extdata.tmphum = (double)X2C_max_real;
+               sondeaprs_extdata.ozonExtV = 0.0;
+               sondeaprs_extdata.mesok = -1L;
+               sondeaprs_extdata.ozonInstType = -1L;
+               sondeaprs_extdata.ozonInstNum = -1L;
+               sondeaprs_extdata.imetTi = (double)X2C_max_real;
+               sondeaprs_extdata.imetTp = (double)X2C_max_real;
+               sondeaprs_extdata.imetTu = (double)X2C_max_real;
+               sondeaprs_extdata.dewp = (double)X2C_max_real;
                sondeaprs_senddata(exlat, exlon, anonym->alt, anonym->speed,
                 anonym->dir, anonym->clmb, 0.0, 0.0,
-                (double)X2C_max_real, 0.0, 0.0, 0.0, 0.0,
+                dfm_temp, 0.0, 0.0, 0.0, 0.0,
                 (double) -(float)(uint32_t)sendmhzfromsdr, 0.0,
                 0.0, anonym->actrt, 0UL, anonym->name, 9ul, 0UL, 0UL, 0UL,
-                0.0, usercall, 11ul, 0UL, 0.0, sondeaprs_nofilter, 0, 0L,
+                dfm_batt, usercall, 11ul, 0UL, 0.0, sondeaprs_nofilter, 0, 0L,
                 typstr, 9ul, ser, 16ul, 0, sdrblock, 0L, xdatablock);
                anonym->lastsent = systime;
             }
@@ -3953,9 +4054,21 @@ static void decoders41(const char rxb[], uint32_t rxb_len,
       wrsdr();
       osi_WrStrLn("", 1ul);
    }
-   if (((((pc && nameok) && calok) && lat!=0.0) && long0!=0.0) && sats>0UL) {
+   if (((pc && nameok) && calok)) {
       res = pc->txtime;
       if (res<100000L) res -= (int32_t)frameno;
+      /* set extended data for RS41 JSON output */
+      sondeaprs_extdata.fstate = (int32_t)(uint8_t)pc->flightstate;
+      sondeaprs_extdata.bk = pc->bk ? 1L : 0L;
+      sondeaprs_extdata.tmphum = tmphum;
+      sondeaprs_extdata.ozonExtV = pc->ozonExtVolt;
+      sondeaprs_extdata.mesok = -1L;
+      sondeaprs_extdata.ozonInstType = -1L;
+      sondeaprs_extdata.ozonInstNum = -1L;
+      sondeaprs_extdata.imetTi = (double)X2C_max_real;
+      sondeaprs_extdata.imetTp = (double)X2C_max_real;
+      sondeaprs_extdata.imetTu = (double)X2C_max_real;
+      sondeaprs_extdata.dewp = (double)X2C_max_real;
       sondeaprs_senddata(lat, long0, heig, speed, dir, climb, 0.0, humidity,
                 temperature, ozonval, pc->ozonTemp, pc->ozonPumpMA,
                 pc->ozonBatVolt, (double)pc->mhz0, (-1.0), 0.0,
@@ -4249,6 +4362,27 @@ static void decodem10(const char rxb[], uint32_t rxb_len,
             cb[8U] = 0;
             aprsstr_Append(fullid, 21ul, cb, 10ul);
          }
+         /*- m20 temp */
+         i = m10rcard(rxb, rxb_len, 20L, 2L);
+         if (i>8191UL) { sct = 2UL; i -= 8192UL; }
+         else if (i>4095UL) { sct = 1UL; i -= 4096UL; }
+         else { sct = 0UL; }
+         rt = (float)(i&4095UL);
+         if (rt!=0.0f && sct<3UL) {
+            rt = X2C_DIVR(4095.0f-rt,rt)-_cnst6[sct];
+            if (rt>0.0f) {
+               rt = X2C_DIVR(_cnst7[sct],rt);
+               if (rt>0.0f) {
+                  rt = (float)log((double)rt);
+                  rt = X2C_DIVR(1.0f,
+                1.07303516E-3f+2.41296733E-4f*rt+2.26744154E-6f*rt*rt+6.52855181E-8f*rt*rt*rt)
+                -273.15f;
+                  if (rt>(-99.0f) && rt<50.0f) rtok = rt;
+               }
+            }
+         }
+         /*- m20 temp */
+         batt = (float)(uint8_t)rxb[54UL]*X2C_DIVR(3.3f,255.0f);
       }
       else {
          lat = (double)(int32_t)m10card(rxb, rxb_len, 30L,
@@ -4345,8 +4479,13 @@ static void decodem10(const char rxb[], uint32_t rxb_len,
       wrsdr();
       osi_WrStrLn("", 1ul);
    }
-   if ((((pc && nameok) && calok) && lat!=0.0) && lon!=0.0) {
+   if (((pc && nameok) && calok)) {
       xdatablock.cnt = 0UL;
+      /* reset extended data (M10, not RS41) */
+      sondeaprs_extdata.fstate = -1L;
+      sondeaprs_extdata.bk = 0L;
+      sondeaprs_extdata.tmphum = (double)X2C_max_real;
+      sondeaprs_extdata.ozonExtV = 0.0;
       sondeaprs_senddata(lat*1.7453292519943E-2, lon*1.7453292519943E-2, alt,
                  v, dir, vv, 0.0, 0.0, (double)rtok, 0.0, 0.0, 0.0,
                 0.0, (double) -(float)(uint32_t)sendmhzfromsdr,
@@ -4584,6 +4723,15 @@ static void decodeimet(const char rxb[], uint32_t rxb_len,
                 2UL)*0.01f;
             pc->hum = (float)imetcard(rxb, rxb_len, p+9UL, 2UL)*0.01f;
             pc->vbatt = (float)imetcard(rxb, rxb_len, p+11UL, 1UL)*0.1f;
+            if (typ=='\004') {
+               /* extended PTU (type 0x04 only, len=20) */
+               sondeaprs_extdata.imetTi = (double)
+                (float)(short)imetcard(rxb, rxb_len, p+12UL, 2UL)*0.01;
+               sondeaprs_extdata.imetTp = (double)
+                (float)(short)imetcard(rxb, rxb_len, p+14UL, 2UL)*0.01;
+               sondeaprs_extdata.imetTu = (double)
+                (float)(short)imetcard(rxb, rxb_len, p+16UL, 2UL)*0.01;
+            }
          }
          else if (typ=='\003') {
             /*
@@ -4599,10 +4747,10 @@ static void decodeimet(const char rxb[], uint32_t rxb_len,
             /* extensions */
             if (len==13UL) {
                /* may be ozone */
-               /*        WrStr(" otyp:"); WrInt(imetcard(rxbuf, p+3, 1), 1);
-                */
-               /*        WrStr(" onum:"); WrInt(imetcard(rxbuf, p+4, 1), 1);
-                */
+               sondeaprs_extdata.ozonInstType = (int32_t)
+                imetcard(rxb, rxb_len, p+3UL, 1UL);
+               sondeaprs_extdata.ozonInstNum = (int32_t)
+                imetcard(rxb, rxb_len, p+4UL, 1UL);
                /*        WrStr(" oi:");
                 WrFixed(FLOAT(imetcard(rxbuf, p+5, 2))*0.001); */
                pc->ozoneuA = (float)imetcard(rxb, rxb_len, p+5UL,
@@ -4658,8 +4806,13 @@ static void decodeimet(const char rxb[], uint32_t rxb_len,
       wrsdr();
       osi_WrStrLn("", 1ul);
    }
-   if ((((pc && nameok) && calok) && lat!=0.0) && long0!=0.0) {
+   if (((pc && nameok) && calok)) {
       xdatablock.cnt = 0UL;
+      /* reset extended data (iMET, not RS41) */
+      sondeaprs_extdata.fstate = -1L;
+      sondeaprs_extdata.bk = 0L;
+      sondeaprs_extdata.tmphum = (double)X2C_max_real;
+      sondeaprs_extdata.ozonExtV = 0.0;
       sondeaprs_senddata(lat*1.7453292519943E-2, long0*1.7453292519943E-2,
                 alt, (double)pc->speed, (double)pc->dir,
                 (double)pc->clb, 0.0, (double)pc->hum,
@@ -4903,8 +5056,13 @@ static void decodemp3(const char rxb[], uint32_t rxb_len,
       osic_WrINT32(pc->lastgpstime, 1UL);
       osi_WrStr(" ", 2ul);
    }
-   if ((((pc && nameok) && calok) && lat!=0.0) && long0!=0.0) {
+   if (((pc && nameok) && calok)) {
       xdatablock.cnt = 0UL;
+      /* reset extended data (MRZ, not RS41) */
+      sondeaprs_extdata.fstate = -1L;
+      sondeaprs_extdata.bk = 0L;
+      sondeaprs_extdata.tmphum = (double)X2C_max_real;
+      sondeaprs_extdata.ozonExtV = 0.0;
       sondeaprs_senddata(lat, long0, alt, kmh*2.7777777777778E-1, dir, clb,
                 0.0, (double)X2C_max_real, (double)X2C_max_real,
                 0.0, 0.0, 0.0, 0.0,
@@ -5183,9 +5341,14 @@ static void decodemeisei(const char rxb[], uint32_t rxb_len,
    /*  Delstr(ser, 0, 3); */
    aprsstr_CardToStr(gethex(pc->name, 9ul, 3UL, 6UL), 1UL, ser, 11ul);
                 /* serial num in decimal */
-   if ((((pc && nameok) && calok) && lat!=0.0) && long0!=0.0) {
+   if (((pc && nameok) && calok)) {
       if (sondeaprs_verb) osi_WrStr(" ", 2ul);
       xdatablock.cnt = 0UL;
+      /* reset extended data (MEISEI, not RS41) */
+      sondeaprs_extdata.fstate = -1L;
+      sondeaprs_extdata.bk = 0L;
+      sondeaprs_extdata.tmphum = (double)X2C_max_real;
+      sondeaprs_extdata.ozonExtV = 0.0;
       sondeaprs_senddata(lat, long0, (double)pc->alt,
                 kmh*2.7777777777778E-1, dir, (double)pc->clb, 0.0,
                 (double)X2C_max_real, (double)X2C_max_real, 0.0,
