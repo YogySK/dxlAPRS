@@ -244,256 +244,256 @@ static void wrcsv(uint32_t sattime, const char typstr[],
    int32_t fd;
    uint32_t j;
    uint32_t i;
-   char h[1000];
-   char s[1000];
+   char h[4096];
+   char s[4096];
    int32_t void0;
    sondeaprs_pUDPDESTS jdest;
    int32_t satdb[33];
    X2C_PCOPY((void **)&objname,objname_len);
    if (sondeaprs_json) {
-      strncpy(s,"{",1000u);
-      aprsstr_Append(s, 1000ul, "\"id\":\"", 7ul);
-      aprsstr_Append(s, 1000ul, objname, objname_len);
-      aprsstr_Append(s, 1000ul, "\"", 2ul);
-      aprsstr_Append(s, 1000ul, ",\"type\":\"", 10ul);
-      aprsstr_Append(s, 1000ul, typstr, typstr_len);
-      aprsstr_Append(s, 1000ul, "\"", 2ul);
+      strncpy(s,"{",4096u);
+      aprsstr_Append(s, 4096ul, "\"id\":\"", 7ul);
+      aprsstr_Append(s, 4096ul, objname, objname_len);
+      aprsstr_Append(s, 4096ul, "\"", 2ul);
+      aprsstr_Append(s, 4096ul, ",\"type\":\"", 10ul);
+      aprsstr_Append(s, 4096ul, typstr, typstr_len);
+      aprsstr_Append(s, 4096ul, "\"", 2ul);
       if (fullid[0]) {
-         aprsstr_Append(s, 1000ul, ",\"ser\":\"", 9ul);
-         aprsstr_Append(s, 1000ul, fullid, fullid_len);
-         aprsstr_Append(s, 1000ul, "\"", 2ul);
+         aprsstr_Append(s, 4096ul, ",\"ser\":\"", 9ul);
+         aprsstr_Append(s, 4096ul, fullid, fullid_len);
+         aprsstr_Append(s, 4096ul, "\"", 2ul);
       }
       if (mhz>0.1) {
-         aprsstr_Append(s, 1000ul, ",\"mhz\":", 8ul);
-         aprsstr_FixToStr((float)(mhz+0.005), 3UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_Append(s, 4096ul, ",\"mhz\":", 8ul);
+         aprsstr_FixToStr((float)(mhz+0.005), 3UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",\"date\":\"", 10ul);
-      aprsstr_DateToStr(sattime, h, 1000ul);
+      aprsstr_Append(s, 4096ul, ",\"date\":\"", 10ul);
+      aprsstr_DateToStr(sattime, h, 4096ul);
       h[10U] = 0;
-      aprsstr_Append(s, 1000ul, h, 1000ul);
-      aprsstr_Append(s, 1000ul, "\"", 2ul);
-      aprsstr_Append(s, 1000ul, ",\"time\":\"", 10ul);
-      aprsstr_TimeToStr(sattime%86400UL, h, 1000ul);
-      aprsstr_Append(s, 1000ul, h, 1000ul);
-      aprsstr_Append(s, 1000ul, "\"", 2ul);
+      aprsstr_Append(s, 4096ul, h, 4096ul);
+      aprsstr_Append(s, 4096ul, "\"", 2ul);
+      aprsstr_Append(s, 4096ul, ",\"time\":\"", 10ul);
+      aprsstr_TimeToStr(sattime%86400UL, h, 4096ul);
+      aprsstr_Append(s, 4096ul, h, 4096ul);
+      aprsstr_Append(s, 4096ul, "\"", 2ul);
       /*  IF uptime>0 THEN Append(s, ',"up":'); TimeToStr(uptime, 1 ,h);
                 Append(s, h) END; */
       if (uptime>0UL) {
-         aprsstr_Append(s, 1000ul, ",\"up\":", 7ul);
-         aprsstr_IntToStr((int32_t)uptime, 1UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_Append(s, 4096ul, ",\"up\":", 7ul);
+         aprsstr_IntToStr((int32_t)uptime, 1UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
       if (txtime>100000L) {
-         aprsstr_Append(s, 1000ul, ",\"bursttx\":", 12ul);
-         aprsstr_IntToStr(txtime-100000L, 1UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_Append(s, 4096ul, ",\"bursttx\":", 12ul);
+         aprsstr_IntToStr(txtime-100000L, 1UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
       if (txtime>0L && txtime<100000L) {
-         aprsstr_Append(s, 1000ul, ",\"txoff\":", 10ul);
-         aprsstr_IntToStr(txtime, 1UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_Append(s, 4096ul, ",\"txoff\":", 10ul);
+         aprsstr_IntToStr(txtime, 1UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",\"lat\":", 8ul);
-      aprsstr_FixToStr((float)(lat*5.7295779513082E+1), 7UL, h, 1000ul);
-      aprsstr_Append(s, 1000ul, h, 1000ul);
-      aprsstr_Append(s, 1000ul, ",\"long\":", 9ul);
-      aprsstr_FixToStr((float)(long0*5.7295779513082E+1), 7UL, h, 1000ul);
-      aprsstr_Append(s, 1000ul, h, 1000ul);
-      aprsstr_Append(s, 1000ul, ",\"alt\":", 8ul);
-      aprsstr_FixToStr((float)alt, 2UL, h, 1000ul);
-      aprsstr_Append(s, 1000ul, h, 1000ul);
+      aprsstr_Append(s, 4096ul, ",\"lat\":", 8ul);
+      aprsstr_FixToStr((float)(lat*5.7295779513082E+1), 7UL, h, 4096ul);
+      aprsstr_Append(s, 4096ul, h, 4096ul);
+      aprsstr_Append(s, 4096ul, ",\"long\":", 9ul);
+      aprsstr_FixToStr((float)(long0*5.7295779513082E+1), 7UL, h, 4096ul);
+      aprsstr_Append(s, 4096ul, h, 4096ul);
+      aprsstr_Append(s, 4096ul, ",\"alt\":", 8ul);
+      aprsstr_FixToStr((float)alt, 2UL, h, 4096ul);
+      aprsstr_Append(s, 4096ul, h, 4096ul);
       if (egmalt>(-1.E+4) && egmalt<1.E+5) {
-         aprsstr_Append(s, 1000ul, ",\"egmalt\":", 11ul);
-         aprsstr_FixToStr((float)egmalt, 2UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_Append(s, 4096ul, ",\"egmalt\":", 11ul);
+         aprsstr_FixToStr((float)egmalt, 2UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
       if (og>(-1.E+4) && og<1.E+5) {
-         aprsstr_Append(s, 1000ul, ",\"og\":", 7ul);
-         aprsstr_FixToStr((float)og, 2UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_Append(s, 4096ul, ",\"og\":", 7ul);
+         aprsstr_FixToStr((float)og, 2UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
          if (ogstr[0UL]) {
-            aprsstr_Append(s, 1000ul, ",\"ogtext\":\"", 12ul);
-            aprsstr_Append(s, 1000ul, ogstr, ogstr_len);
-            aprsstr_Append(s, 1000ul, "\"", 2ul);
+            aprsstr_Append(s, 4096ul, ",\"ogtext\":\"", 12ul);
+            aprsstr_Append(s, 4096ul, ogstr, ogstr_len);
+            aprsstr_Append(s, 4096ul, "\"", 2ul);
          }
       }
-      aprsstr_Append(s, 1000ul, ",\"spd\":", 8ul);
-      aprsstr_FixToStr((float)(speed*3.6), 2UL, h, 1000ul);
-      aprsstr_Append(s, 1000ul, h, 1000ul);
-      aprsstr_Append(s, 1000ul, ",\"dir\":", 8ul);
-      aprsstr_FixToStr((float)dir, 2UL, h, 1000ul);
-      aprsstr_Append(s, 1000ul, h, 1000ul);
+      aprsstr_Append(s, 4096ul, ",\"spd\":", 8ul);
+      aprsstr_FixToStr((float)(speed*3.6), 2UL, h, 4096ul);
+      aprsstr_Append(s, 4096ul, h, 4096ul);
+      aprsstr_Append(s, 4096ul, ",\"dir\":", 8ul);
+      aprsstr_FixToStr((float)dir, 2UL, h, 4096ul);
+      aprsstr_Append(s, 4096ul, h, 4096ul);
       if (clb<1000.0) {
-         aprsstr_Append(s, 1000ul, ",\"clb\":", 8ul);
-         aprsstr_FixToStr((float)clb, 3UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_Append(s, 4096ul, ",\"clb\":", 8ul);
+         aprsstr_FixToStr((float)clb, 3UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
       if (goodsats>0UL) {
-         aprsstr_Append(s, 1000ul, ",\"sat\":", 8ul);
-         aprsstr_IntToStr((int32_t)goodsats, 1UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_Append(s, 4096ul, ",\"sat\":", 8ul);
+         aprsstr_IntToStr((int32_t)goodsats, 1UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
       if (vBatt>0.1) {
-         aprsstr_Append(s, 1000ul, ",\"ub\":", 7ul);
-         aprsstr_FixToStr((float)vBatt, 3UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_Append(s, 4096ul, ",\"ub\":", 7ul);
+         aprsstr_FixToStr((float)vBatt, 3UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
       if (txpower>0UL) {
-         aprsstr_Append(s, 1000ul, ",\"txpo\":", 9ul);
-         aprsstr_IntToStr((int32_t)txpower, 2UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_Append(s, 4096ul, ",\"txpo\":", 9ul);
+         aprsstr_IntToStr((int32_t)txpower, 2UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
       if (calperc>0UL) {
-         aprsstr_Append(s, 1000ul, ",\"cal\":", 8ul);
-         aprsstr_IntToStr((int32_t)calperc, 1UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_Append(s, 4096ul, ",\"cal\":", 8ul);
+         aprsstr_IntToStr((int32_t)calperc, 1UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
       if (hrms>0.01) {
-         aprsstr_Append(s, 1000ul, ",\"hrms\":", 9ul);
-         aprsstr_FixToStr((float)hrms, 2UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_Append(s, 4096ul, ",\"hrms\":", 9ul);
+         aprsstr_FixToStr((float)hrms, 2UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
       if (vrms>0.01) {
-         aprsstr_Append(s, 1000ul, ",\"vrms\":", 9ul);
-         aprsstr_FixToStr((float)vrms, 2UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_Append(s, 4096ul, ",\"vrms\":", 9ul);
+         aprsstr_FixToStr((float)vrms, 2UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
       if (sondeaprs_extdata.fstate>=0L) {
-         aprsstr_Append(s, 1000ul, ",\"fstate\":", 11ul);
-         aprsstr_IntToStr(sondeaprs_extdata.fstate, 1UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_Append(s, 4096ul, ",\"fstate\":", 11ul);
+         aprsstr_IntToStr(sondeaprs_extdata.fstate, 1UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
       if (sondeaprs_extdata.bk) {
-         aprsstr_Append(s, 1000ul, ",\"bk\":1", 8ul);
+         aprsstr_Append(s, 4096ul, ",\"bk\":1", 8ul);
       }
       if (sondeaprs_extdata.mesok>=0L) {
-         aprsstr_Append(s, 1000ul, ",\"mesok\":", 10ul);
-         aprsstr_IntToStr(sondeaprs_extdata.mesok, 1UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_Append(s, 4096ul, ",\"mesok\":", 10ul);
+         aprsstr_IntToStr(sondeaprs_extdata.mesok, 1UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
       if (temp>(-1000.0) && temp<1000.0) {
-         aprsstr_Append(s, 1000ul, ",\"ptu\":{\"t\":", 13ul);
-         aprsstr_FixToStr((float)temp, 3UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_Append(s, 4096ul, ",\"ptu\":{\"t\":", 13ul);
+         aprsstr_FixToStr((float)temp, 3UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
          if (hp>0.1 && hp<2000.0) {
-            aprsstr_Append(s, 1000ul, ",\"p\":", 6ul);
-            aprsstr_FixToStr((float)hp, 3UL, h, 1000ul);
-            aprsstr_Append(s, 1000ul, h, 1000ul);
+            aprsstr_Append(s, 4096ul, ",\"p\":", 6ul);
+            aprsstr_FixToStr((float)hp, 3UL, h, 4096ul);
+            aprsstr_Append(s, 4096ul, h, 4096ul);
          }
          if (hyg>0.1 && hyg<=100.0) {
-            aprsstr_Append(s, 1000ul, ",\"h\":", 6ul);
-            aprsstr_FixToStr((float)hyg, 2UL, h, 1000ul);
-            aprsstr_Append(s, 1000ul, h, 1000ul);
+            aprsstr_Append(s, 4096ul, ",\"h\":", 6ul);
+            aprsstr_FixToStr((float)hyg, 2UL, h, 4096ul);
+            aprsstr_Append(s, 4096ul, h, 4096ul);
          }
          if (sondeaprs_extdata.tmphum>(-100.0)
                    && sondeaprs_extdata.tmphum<100.0) {
-            aprsstr_Append(s, 1000ul, ",\"th\":", 7ul);
+            aprsstr_Append(s, 4096ul, ",\"th\":", 7ul);
             aprsstr_FixToStr((float)sondeaprs_extdata.tmphum, 3UL, h,
-                1000ul);
-            aprsstr_Append(s, 1000ul, h, 1000ul);
+                4096ul);
+            aprsstr_Append(s, 4096ul, h, 4096ul);
          }
          if (sondeaprs_extdata.dewp>(-100.0)
                    && sondeaprs_extdata.dewp<100.0) {
-            aprsstr_Append(s, 1000ul, ",\"dewp\":", 9ul);
-            aprsstr_FixToStr((float)sondeaprs_extdata.dewp, 2UL, h, 1000ul);
-            aprsstr_Append(s, 1000ul, h, 1000ul);
+            aprsstr_Append(s, 4096ul, ",\"dewp\":", 9ul);
+            aprsstr_FixToStr((float)sondeaprs_extdata.dewp, 2UL, h, 4096ul);
+            aprsstr_Append(s, 4096ul, h, 4096ul);
          }
          if (sondeaprs_extdata.imetTi>(-100.0)
                    && sondeaprs_extdata.imetTi<100.0) {
-            aprsstr_Append(s, 1000ul, ",\"ti\":", 7ul);
+            aprsstr_Append(s, 4096ul, ",\"ti\":", 7ul);
             aprsstr_FixToStr((float)sondeaprs_extdata.imetTi, 2UL, h,
-                1000ul);
-            aprsstr_Append(s, 1000ul, h, 1000ul);
+                4096ul);
+            aprsstr_Append(s, 4096ul, h, 4096ul);
          }
          if (sondeaprs_extdata.imetTp>(-100.0)
                    && sondeaprs_extdata.imetTp<100.0) {
-            aprsstr_Append(s, 1000ul, ",\"tp\":", 7ul);
+            aprsstr_Append(s, 4096ul, ",\"tp\":", 7ul);
             aprsstr_FixToStr((float)sondeaprs_extdata.imetTp, 2UL, h,
-                1000ul);
-            aprsstr_Append(s, 1000ul, h, 1000ul);
+                4096ul);
+            aprsstr_Append(s, 4096ul, h, 4096ul);
          }
          if (sondeaprs_extdata.imetTu>(-100.0)
                    && sondeaprs_extdata.imetTu<100.0) {
-            aprsstr_Append(s, 1000ul, ",\"tu\":", 7ul);
+            aprsstr_Append(s, 4096ul, ",\"tu\":", 7ul);
             aprsstr_FixToStr((float)sondeaprs_extdata.imetTu, 2UL, h,
-                1000ul);
-            aprsstr_Append(s, 1000ul, h, 1000ul);
+                4096ul);
+            aprsstr_Append(s, 4096ul, h, 4096ul);
          }
-         aprsstr_Append(s, 1000ul, "}", 2ul);
+         aprsstr_Append(s, 4096ul, "}", 2ul);
       }
       if (ozon>0.01) {
-         aprsstr_Append(s, 1000ul, ",\"aux\":{\"o3\":", 14ul);
-         aprsstr_FixToStr((float)ozon, 3UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
-         aprsstr_Append(s, 1000ul, ",\"o3tmp\":", 10ul);
-         aprsstr_FixToStr((float)otemp, 2UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
-         aprsstr_Append(s, 1000ul, ",\"pumpma\":", 11ul);
-         aprsstr_FixToStr((float)pumpmA, 2UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
-         aprsstr_Append(s, 1000ul, ",\"pumpv\":", 10ul);
-         aprsstr_FixToStr((float)pumpv, 3UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_Append(s, 4096ul, ",\"aux\":{\"o3\":", 14ul);
+         aprsstr_FixToStr((float)ozon, 3UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
+         aprsstr_Append(s, 4096ul, ",\"o3tmp\":", 10ul);
+         aprsstr_FixToStr((float)otemp, 2UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
+         aprsstr_Append(s, 4096ul, ",\"pumpma\":", 11ul);
+         aprsstr_FixToStr((float)pumpmA, 2UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
+         aprsstr_Append(s, 4096ul, ",\"pumpv\":", 10ul);
+         aprsstr_FixToStr((float)pumpv, 3UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
          if (sondeaprs_extdata.ozonExtV>0.01) {
-            aprsstr_Append(s, 1000ul, ",\"extv\":", 9ul);
+            aprsstr_Append(s, 4096ul, ",\"extv\":", 9ul);
             aprsstr_FixToStr((float)sondeaprs_extdata.ozonExtV, 2UL, h,
-                1000ul);
-            aprsstr_Append(s, 1000ul, h, 1000ul);
+                4096ul);
+            aprsstr_Append(s, 4096ul, h, 4096ul);
          }
          if (sondeaprs_extdata.ozonInstType>=0L) {
-            aprsstr_Append(s, 1000ul, ",\"otyp\":", 9ul);
+            aprsstr_Append(s, 4096ul, ",\"otyp\":", 9ul);
             aprsstr_IntToStr(sondeaprs_extdata.ozonInstType, 1UL, h,
-                1000ul);
-            aprsstr_Append(s, 1000ul, h, 1000ul);
+                4096ul);
+            aprsstr_Append(s, 4096ul, h, 4096ul);
          }
          if (sondeaprs_extdata.ozonInstNum>=0L) {
-            aprsstr_Append(s, 1000ul, ",\"onum\":", 9ul);
-            aprsstr_IntToStr(sondeaprs_extdata.ozonInstNum, 1UL, h, 1000ul);
-            aprsstr_Append(s, 1000ul, h, 1000ul);
+            aprsstr_Append(s, 4096ul, ",\"onum\":", 9ul);
+            aprsstr_IntToStr(sondeaprs_extdata.ozonInstNum, 1UL, h, 4096ul);
+            aprsstr_Append(s, 4096ul, h, 4096ul);
          }
-         aprsstr_Append(s, 1000ul, "}", 2ul);
+         aprsstr_Append(s, 4096ul, "}", 2ul);
       }
       if (sdr.freq) {
-         aprsstr_Append(s, 1000ul, ",\"sdr\":{\"rx\":", 14ul);
+         aprsstr_Append(s, 4096ul, ",\"sdr\":{\"rx\":", 14ul);
          aprsstr_FixToStr((float)sdr.freq*0.00001f+0.0005f, 4UL, h,
-                1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+                4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
          if (sdr.maxafc) {
-            aprsstr_Append(s, 1000ul, ",\"afc\":", 8ul);
-            aprsstr_IntToStr(sdr.afc, 1UL, h, 1000ul);
-            aprsstr_Append(s, 1000ul, h, 1000ul);
-            aprsstr_Append(s, 1000ul, ",\"mafc\":", 9ul);
-            aprsstr_IntToStr((int32_t)sdr.maxafc, 1UL, h, 1000ul);
-            aprsstr_Append(s, 1000ul, h, 1000ul);
+            aprsstr_Append(s, 4096ul, ",\"afc\":", 8ul);
+            aprsstr_IntToStr(sdr.afc, 1UL, h, 4096ul);
+            aprsstr_Append(s, 4096ul, h, 4096ul);
+            aprsstr_Append(s, 4096ul, ",\"mafc\":", 9ul);
+            aprsstr_IntToStr((int32_t)sdr.maxafc, 1UL, h, 4096ul);
+            aprsstr_Append(s, 4096ul, h, 4096ul);
          }
          if (sdr.db) {
-            aprsstr_Append(s, 1000ul, ",\"rssi\":", 9ul);
-            aprsstr_FixToStr((float)sdr.db*0.1f, 2UL, h, 1000ul);
-            aprsstr_Append(s, 1000ul, h, 1000ul);
+            aprsstr_Append(s, 4096ul, ",\"rssi\":", 9ul);
+            aprsstr_FixToStr((float)sdr.db*0.1f, 2UL, h, 4096ul);
+            aprsstr_Append(s, 4096ul, h, 4096ul);
          }
          if (sdr.name[0UL]) {
-            aprsstr_Append(s, 1000ul, ",\"rxid\":\"", 10ul);
-            aprsstr_Append(s, 1000ul, sdr.name, 4ul);
-            aprsstr_Append(s, 1000ul, "\"", 2ul);
+            aprsstr_Append(s, 4096ul, ",\"rxid\":\"", 10ul);
+            aprsstr_Append(s, 4096ul, sdr.name, 4ul);
+            aprsstr_Append(s, 4096ul, "\"", 2ul);
          }
-         aprsstr_Append(s, 1000ul, "}", 2ul);
+         aprsstr_Append(s, 4096ul, "}", 2ul);
       }
       if (ele>=(-90.0)) {
-         aprsstr_Append(s, 1000ul, ",\"ant\":{\"az\":", 14ul);
-         aprsstr_FixToStr((float)azi, 2UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
-         aprsstr_Append(s, 1000ul, ",\"el\":", 7ul);
-         aprsstr_FixToStr((float)ele, 3UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
-         aprsstr_Append(s, 1000ul, ",\"d\":", 6ul);
-         aprsstr_FixToStr((float)dist, 4UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
-         aprsstr_Append(s, 1000ul, "}", 2ul);
+         aprsstr_Append(s, 4096ul, ",\"ant\":{\"az\":", 14ul);
+         aprsstr_FixToStr((float)azi, 2UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
+         aprsstr_Append(s, 4096ul, ",\"el\":", 7ul);
+         aprsstr_FixToStr((float)ele, 3UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
+         aprsstr_Append(s, 4096ul, ",\"d\":", 6ul);
+         aprsstr_FixToStr((float)dist, 4UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
+         aprsstr_Append(s, 4096ul, "}", 2ul);
       }
-      aprsstr_Append(s, 1000ul, ",\"uid\":\"", 9ul);
-      aprsstr_Append(s, 1000ul, user, user_len);
-      aprsstr_Append(s, 1000ul, "\"", 2ul);
+      aprsstr_Append(s, 4096ul, ",\"uid\":\"", 9ul);
+      aprsstr_Append(s, 4096ul, user, user_len);
+      aprsstr_Append(s, 4096ul, "\"", 2ul);
       if (psatsig) {
          for (i = 1UL; i<=32UL; i++) {
             satdb[i] = -1L;
@@ -503,42 +503,42 @@ static void wrcsv(uint32_t sattime, const char typstr[],
                satdb[psatsig[i].num] = (int32_t)psatsig[i].level;
             }
          } /* end for */
-         aprsstr_Append(s, 1000ul, ",\"satdb\":[", 11ul);
+         aprsstr_Append(s, 4096ul, ",\"satdb\":[", 11ul);
          for (i = 1UL; i<=32UL; i++) {
-            if (i>1UL) aprsstr_Append(s, 1000ul, ",", 2ul);
-            if (satdb[i]<0L) aprsstr_Append(s, 1000ul, "-1", 3ul);
-            else if (satdb[i]==0L) aprsstr_Append(s, 1000ul, "0", 2ul);
+            if (i>1UL) aprsstr_Append(s, 4096ul, ",", 2ul);
+            if (satdb[i]<0L) aprsstr_Append(s, 4096ul, "-1", 3ul);
+            else if (satdb[i]==0L) aprsstr_Append(s, 4096ul, "0", 2ul);
             else {
                aprsstr_FixToStr((float)((double)satdb[i]*0.2), 2UL,
-                h, 1000ul);
-               aprsstr_Append(s, 1000ul, h, 1000ul);
+                h, 4096ul);
+               aprsstr_Append(s, 4096ul, h, 4096ul);
             }
          } /* end for */
-         aprsstr_Append(s, 1000ul, "]", 2ul);
+         aprsstr_Append(s, 4096ul, "]", 2ul);
       }
-      aprsstr_Append(s, 1000ul, ",\"leaps\":", 10ul);
-      aprsstr_IntToStr(leapsecs, 1UL, h, 1000ul);
-      aprsstr_Append(s, 1000ul, h, 1000ul);
+      aprsstr_Append(s, 4096ul, ",\"leaps\":", 10ul);
+      aprsstr_IntToStr(leapsecs, 1UL, h, 4096ul);
+      aprsstr_Append(s, 4096ul, h, 4096ul);
       j = 0UL;
       while (j<xdatas.cnt) {
-         aprsstr_Append(s, 1000ul, ",\"xdata", 8ul);
+         aprsstr_Append(s, 4096ul, ",\"xdata", 8ul);
          if (j>0UL) {
-            aprsstr_IntToStr((int32_t)j, 1UL, h, 1000ul);
-            aprsstr_Append(s, 1000ul, h, 1000ul);
+            aprsstr_IntToStr((int32_t)j, 1UL, h, 4096ul);
+            aprsstr_Append(s, 4096ul, h, 4096ul);
          }
-         aprsstr_Append(s, 1000ul, "\":[", 4ul);
+         aprsstr_Append(s, 4096ul, "\":[", 4ul);
          i = 0UL;
          while (i<xdatas.xdata[j].len) {
-            if (i>0UL) aprsstr_Append(s, 1000ul, ",", 2ul);
+            if (i>0UL) aprsstr_Append(s, 4096ul, ",", 2ul);
             aprsstr_IntToStr((int32_t)(uint32_t)(uint8_t)
-                xdatas.xdata[j].frame[i], 1UL, h, 1000ul);
-            aprsstr_Append(s, 1000ul, h, 1000ul);
+                xdatas.xdata[j].frame[i], 1UL, h, 4096ul);
+            aprsstr_Append(s, 4096ul, h, 4096ul);
             ++i;
          }
-         aprsstr_Append(s, 1000ul, "]", 2ul);
+         aprsstr_Append(s, 4096ul, "]", 2ul);
          ++j;
       }
-      aprsstr_Append(s, 1000ul, "}\012", 3ul);
+      aprsstr_Append(s, 4096ul, "}\012", 3ul);
       if (sondeaprs_csvfilename[0UL]) {
          if (jsonfd<0L) {
             jsonfd = osi_OpenNONBLOCK(sondeaprs_csvfilename, 1025ul);
@@ -549,15 +549,15 @@ static void wrcsv(uint32_t sattime, const char typstr[],
             else osic_Seekend(jsonfd, 0L);
          }
          if (jsonfd>=0L) {
-            osi_WrBin(jsonfd, (char *)s, 1000u/1u, aprsstr_Length(s,
-                1000ul));
+            osi_WrBin(jsonfd, (char *)s, 4096u/1u, aprsstr_Length(s,
+                4096ul));
          }
          else osi_WrStrLn("cannot write json-file", 23ul);
       }
       jdest = sondeaprs_jsondests;
       while (jdest) {
          void0 = udpsend(sondeaprs_udpsock, s, (int32_t)aprsstr_Length(s,
-                1000ul), jdest->port, jdest->ipnum);
+                4096ul), jdest->port, jdest->ipnum);
          jdest = jdest->next;
       }
    }
@@ -567,7 +567,7 @@ static void wrcsv(uint32_t sattime, const char typstr[],
          fd = osi_OpenWrite(sondeaprs_csvfilename, 1025ul);
          strncpy(s,"Date,Time,Type,Name,lat,long,alt,speed,dir,clb,egmalt,og,\
 mhz,sats,uptime,hPa,hum,temp,ozon,ozont,pumpmA,pumpV,RxMHz,AFC,maxAFC,rssi,de\
-v,dist,azimuth,elevation,ser,TXdBm,batt,TxOff\012",1000u);
+v,dist,azimuth,elevation,ser,TXdBm,batt,TxOff\012",4096u);
       }
       else s[0] = 0;
       if (fd<0L) {
@@ -575,166 +575,166 @@ v,dist,azimuth,elevation,ser,TXdBm,batt,TxOff\012",1000u);
          goto label;
       }
       if (s[0U]) {
-         osi_WrBin(fd, (char *)s, 1000u/1u, aprsstr_Length(s, 1000ul));
+         osi_WrBin(fd, (char *)s, 4096u/1u, aprsstr_Length(s, 4096ul));
                 /* csv headline */
       }
       s[0] = 0;
       if (sattime>=86400UL) {
-         aprsstr_DateToStr(sattime, s, 1000ul);
+         aprsstr_DateToStr(sattime, s, 4096ul);
          s[10U] = 0;
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (sattime>0UL) {
-         aprsstr_TimeToStr(sattime%86400UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_TimeToStr(sattime%86400UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
-      aprsstr_Append(s, 1000ul, typstr, typstr_len);
-      aprsstr_Append(s, 1000ul, ",", 2ul);
-      aprsstr_Append(s, 1000ul, objname, objname_len);
-      aprsstr_Append(s, 1000ul, ",", 2ul);
-      aprsstr_FixToStr((float)(lat*5.7295779513082E+1), 6UL, h, 1000ul);
-      aprsstr_Append(s, 1000ul, h, 1000ul);
-      aprsstr_Append(s, 1000ul, ",", 2ul);
-      aprsstr_FixToStr((float)(long0*5.7295779513082E+1), 6UL, h, 1000ul);
-      aprsstr_Append(s, 1000ul, h, 1000ul);
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, typstr, typstr_len);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, objname, objname_len);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
+      aprsstr_FixToStr((float)(lat*5.7295779513082E+1), 6UL, h, 4096ul);
+      aprsstr_Append(s, 4096ul, h, 4096ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
+      aprsstr_FixToStr((float)(long0*5.7295779513082E+1), 6UL, h, 4096ul);
+      aprsstr_Append(s, 4096ul, h, 4096ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       aprsstr_IntToStr((int32_t)X2C_TRUNCI(alt,X2C_min_longint,
-                X2C_max_longint), 1UL, h, 1000ul);
-      aprsstr_Append(s, 1000ul, h, 1000ul);
-      aprsstr_Append(s, 1000ul, ",", 2ul);
-      aprsstr_FixToStr((float)(speed*3.6), 2UL, h, 1000ul);
-      aprsstr_Append(s, 1000ul, h, 1000ul);
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+                X2C_max_longint), 1UL, h, 4096ul);
+      aprsstr_Append(s, 4096ul, h, 4096ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
+      aprsstr_FixToStr((float)(speed*3.6), 2UL, h, 4096ul);
+      aprsstr_Append(s, 4096ul, h, 4096ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       aprsstr_IntToStr((int32_t)X2C_TRUNCI(dir,X2C_min_longint,
-                X2C_max_longint), 1UL, h, 1000ul);
-      aprsstr_Append(s, 1000ul, h, 1000ul);
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+                X2C_max_longint), 1UL, h, 4096ul);
+      aprsstr_Append(s, 4096ul, h, 4096ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (clb<1000.0) {
-         aprsstr_FixToStr((float)clb, 2UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_FixToStr((float)clb, 2UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (egmalt>(-1.E+4) && egmalt<1.E+5) {
          aprsstr_IntToStr((int32_t)X2C_TRUNCI(egmalt,X2C_min_longint,
-                X2C_max_longint), 1UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+                X2C_max_longint), 1UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (og>(-1.E+4) && og<1.E+5) {
          aprsstr_IntToStr((int32_t)X2C_TRUNCI(og,X2C_min_longint,
-                X2C_max_longint), 1UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+                X2C_max_longint), 1UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (mhz>0.1) {
-         aprsstr_FixToStr((float)(mhz+0.005), 3UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_FixToStr((float)(mhz+0.005), 3UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (goodsats>0UL) {
-         aprsstr_IntToStr((int32_t)goodsats, 1UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_IntToStr((int32_t)goodsats, 1UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (uptime>0UL) {
-         aprsstr_TimeToStr(uptime, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_TimeToStr(uptime, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (hp>0.1 && hp<2000.0) {
-         aprsstr_FixToStr((float)hp, 2UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_FixToStr((float)hp, 2UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (hyg>0.1 && hyg<=100.0) {
          aprsstr_IntToStr((int32_t)X2C_TRUNCI(hyg,X2C_min_longint,
-                X2C_max_longint), 1UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+                X2C_max_longint), 1UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (temp>(-1000.0) && temp<1000.0) {
-         aprsstr_FixToStr((float)temp, 2UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_FixToStr((float)temp, 2UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (ozon>0.1) {
-         aprsstr_FixToStr((float)ozon, 2UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_FixToStr((float)ozon, 2UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (ozon>0.1) {
-         aprsstr_FixToStr((float)otemp, 2UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_FixToStr((float)otemp, 2UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (ozon>0.1 && pumpmA>0.1) {
-         aprsstr_FixToStr((float)pumpmA, 2UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_FixToStr((float)pumpmA, 2UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (ozon>0.1 && pumpv>0.1) {
-         aprsstr_FixToStr((float)pumpv, 3UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_FixToStr((float)pumpv, 3UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (sdr.freq) {
          aprsstr_FixToStr((float)sdr.freq*0.00001f+0.0005f, 4UL, h,
-                1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+                4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (sdr.maxafc) {
-         aprsstr_IntToStr(sdr.afc, 1UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_IntToStr(sdr.afc, 1UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (sdr.maxafc) {
-         aprsstr_IntToStr((int32_t)sdr.maxafc, 1UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_IntToStr((int32_t)sdr.maxafc, 1UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (sdr.db) {
-         aprsstr_FixToStr((float)sdr.db*0.1f, 2UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_FixToStr((float)sdr.db*0.1f, 2UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
-      if (sdr.name[0UL]) aprsstr_Append(s, 1000ul, sdr.name, 4ul);
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
+      if (sdr.name[0UL]) aprsstr_Append(s, 4096ul, sdr.name, 4ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (dist>=0.0) {
-         aprsstr_FixToStr((float)dist, 4UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_FixToStr((float)dist, 4UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (azi>=0.0) {
-         aprsstr_FixToStr((float)azi, 2UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_FixToStr((float)azi, 2UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (ele>=(-90.0)) {
-         aprsstr_FixToStr((float)ele, 3UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_FixToStr((float)ele, 3UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
-      if (fullid[0UL]) aprsstr_Append(s, 1000ul, fullid, fullid_len);
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
+      if (fullid[0UL]) aprsstr_Append(s, 4096ul, fullid, fullid_len);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (txpower>0UL) {
-         aprsstr_IntToStr((int32_t)txpower, 2UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_IntToStr((int32_t)txpower, 2UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (vBatt>0.1) {
-         aprsstr_FixToStr((float)vBatt, 2UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_FixToStr((float)vBatt, 2UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, ",", 2ul);
+      aprsstr_Append(s, 4096ul, ",", 2ul);
       if (txtime>=100000L) txtime -= 100000L;
       if (txtime>0L) {
-         aprsstr_IntToStr(txtime, 1UL, h, 1000ul);
-         aprsstr_Append(s, 1000ul, h, 1000ul);
+         aprsstr_IntToStr(txtime, 1UL, h, 4096ul);
+         aprsstr_Append(s, 4096ul, h, 4096ul);
       }
-      aprsstr_Append(s, 1000ul, "\012", 2ul);
-      osi_WrBin(fd, (char *)s, 1000u/1u, aprsstr_Length(s, 1000ul));
+      aprsstr_Append(s, 4096ul, "\012", 2ul);
+      osi_WrBin(fd, (char *)s, 4096u/1u, aprsstr_Length(s, 4096ul));
       osic_Close(fd);
    }
    label:;
