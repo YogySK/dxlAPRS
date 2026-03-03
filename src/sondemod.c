@@ -2680,6 +2680,12 @@ static void decodec34(const char rxb[], uint32_t rxb_len,
             sondeaprs_extdata.bk = 0L;
             sondeaprs_extdata.tmphum = (double)X2C_max_real;
             sondeaprs_extdata.ozonExtV = 0.0;
+            sondeaprs_extdata.mesok = -1L;
+            sondeaprs_extdata.ozonInstType = -1L;
+            sondeaprs_extdata.ozonInstNum = -1L;
+            sondeaprs_extdata.imetTi = (double)X2C_max_real;
+            sondeaprs_extdata.imetTp = (double)X2C_max_real;
+            sondeaprs_extdata.imetTu = (double)X2C_max_real;
             sondeaprs_senddata(exlat, exlon, anonym2->alt, anonym2->speed,
                 anonym2->dir, anonym2->clmb, 0.0, shum, stemp, 0.0, 0.0, 0.0,
                  0.0, (double) -(float)(uint32_t)sendmhzfromsdr,
@@ -4486,6 +4492,13 @@ static void decodem10(const char rxb[], uint32_t rxb_len,
       sondeaprs_extdata.bk = 0L;
       sondeaprs_extdata.tmphum = (double)X2C_max_real;
       sondeaprs_extdata.ozonExtV = 0.0;
+      sondeaprs_extdata.mesok = -1L;
+      sondeaprs_extdata.ozonInstType = -1L;
+      sondeaprs_extdata.ozonInstNum = -1L;
+      sondeaprs_extdata.imetTi = (double)X2C_max_real;
+      sondeaprs_extdata.imetTp = (double)X2C_max_real;
+      sondeaprs_extdata.imetTu = (double)X2C_max_real;
+      sondeaprs_extdata.dewp = (double)X2C_max_real;
       sondeaprs_senddata(lat*1.7453292519943E-2, lon*1.7453292519943E-2, alt,
                  v, dir, vv, 0.0, 0.0, (double)rtok, 0.0, 0.0, 0.0,
                 0.0, (double) -(float)(uint32_t)sendmhzfromsdr,
@@ -4813,6 +4826,8 @@ static void decodeimet(const char rxb[], uint32_t rxb_len,
       sondeaprs_extdata.bk = 0L;
       sondeaprs_extdata.tmphum = (double)X2C_max_real;
       sondeaprs_extdata.ozonExtV = 0.0;
+      sondeaprs_extdata.mesok = -1L;
+      sondeaprs_extdata.dewp = (double)X2C_max_real;
       sondeaprs_senddata(lat*1.7453292519943E-2, long0*1.7453292519943E-2,
                 alt, (double)pc->speed, (double)pc->dir,
                 (double)pc->clb, 0.0, (double)pc->hum,
@@ -5063,6 +5078,13 @@ static void decodemp3(const char rxb[], uint32_t rxb_len,
       sondeaprs_extdata.bk = 0L;
       sondeaprs_extdata.tmphum = (double)X2C_max_real;
       sondeaprs_extdata.ozonExtV = 0.0;
+      sondeaprs_extdata.mesok = -1L;
+      sondeaprs_extdata.ozonInstType = -1L;
+      sondeaprs_extdata.ozonInstNum = -1L;
+      sondeaprs_extdata.imetTi = (double)X2C_max_real;
+      sondeaprs_extdata.imetTp = (double)X2C_max_real;
+      sondeaprs_extdata.imetTu = (double)X2C_max_real;
+      sondeaprs_extdata.dewp = (double)X2C_max_real;
       sondeaprs_senddata(lat, long0, alt, kmh*2.7777777777778E-1, dir, clb,
                 0.0, (double)X2C_max_real, (double)X2C_max_real,
                 0.0, 0.0, 0.0, 0.0,
@@ -5349,6 +5371,13 @@ static void decodemeisei(const char rxb[], uint32_t rxb_len,
       sondeaprs_extdata.bk = 0L;
       sondeaprs_extdata.tmphum = (double)X2C_max_real;
       sondeaprs_extdata.ozonExtV = 0.0;
+      sondeaprs_extdata.mesok = -1L;
+      sondeaprs_extdata.ozonInstType = -1L;
+      sondeaprs_extdata.ozonInstNum = -1L;
+      sondeaprs_extdata.imetTi = (double)X2C_max_real;
+      sondeaprs_extdata.imetTp = (double)X2C_max_real;
+      sondeaprs_extdata.imetTu = (double)X2C_max_real;
+      sondeaprs_extdata.dewp = (double)X2C_max_real;
       sondeaprs_senddata(lat, long0, (double)pc->alt,
                 kmh*2.7777777777778E-1, dir, (double)pc->clb, 0.0,
                 (double)X2C_max_real, (double)X2C_max_real, 0.0,

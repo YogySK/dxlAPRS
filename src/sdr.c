@@ -1313,12 +1313,12 @@ extern char sdr_startsdr(char ip[], uint32_t ip_len,
    }
    if (inhz>0UL) rtlhz = inhz;
    if (format==4UL) {
-      if (rtlhz<1000000UL || rtlhz>3000000UL) return 0;
+      if (rtlhz<1000000UL || rtlhz>12000000UL) return 0;
       bytespersamp = 8UL;
       iqlevel = 2.0f;
       varbwk = X2C_DIVR(1.3913043478261f,(float)rtlhz);
    }
-   else if (rtlhz!=1024000UL && (rtlhz<2048000UL || rtlhz>2500000UL)) {
+   else if (rtlhz!=1024000UL && (rtlhz<2048000UL || rtlhz>12000000UL)) {
       return 0;
    }
    if (outhz>0UL) audiohz = outhz;

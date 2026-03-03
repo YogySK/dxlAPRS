@@ -892,12 +892,12 @@ to avoid ADC-DC offset pseudo", 79ul);
    powersave = (powersave*samphz)/32000UL;
    maxwake = (maxwake*samphz)/32000UL;
    if (f32==4UL) {
-      if (iqrate<1000000UL || iqrate>3000000UL) {
-         Error(" -i <Hz> 1000000..3000000", 26ul);
+      if (iqrate<1000000UL || iqrate>12000000UL) {
+         Error(" -i <Hz> 1000000..12000000", 27ul);
       }
    }
-   else if (iqrate!=1024000UL && (iqrate<2000000UL || iqrate>2500000UL)) {
-      Error(" -i <Hz> 1024000 or >=2000000", 30ul);
+   else if (iqrate!=1024000UL && (iqrate<2000000UL || iqrate>12000000UL)) {
+      Error(" -i <Hz> 1024000 or 2000000..12000000", 38ul);
    }
    if (downsamp==0UL) downsamp = samphz;
    if (downsamp>samphz) Error(" -d <hz> must be less than -r <hz>", 35ul);
