@@ -42,6 +42,12 @@ This fork (`YogySK/dxlAPRS`) adds extended JSON output fields for the YogyTracke
   - P-sensor variant detection (DFM-09P, DFM-17P: shifted measurement indices)
 - **Battery voltage**: raw16 at conf_id 5 (or 7 for P-type) / 1000.0 V (DFM-09+)
 
+### sdrtst Noise Metric Output (sdrtest.c)
+- `showrssi()` now appends `:medmed` (smoothed FM noise level) after the dB/db suffix
+- Output changed from `67.0dB 1` to `67.0dB:0.80 1`
+- `medmed` is an exponential moving average of `sqsum` (per-block FM noise variance), α=0.1
+- Enables YogyFeeder to display accurate squelch threshold bar: threshold = `squelchPct × 0.16` (same as sdrtst's `lev = sq*32/200`)
+
 ### YogyFeeder Pipeline (separate repo)
 - `satdb[]` per-satellite signal levels: parsed, forwarded to YogyTracker
 - `xdata[]` raw auxiliary frames: parsed (xdata, xdata1, xdata2), forwarded
