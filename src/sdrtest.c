@@ -1310,12 +1310,10 @@ static void showrssi(void)
          osi_Werr(s, 31ul);
          if (squelchs[j].sqsave<=0L) osi_Werr("db", 3ul);
          else osi_Werr("dB", 3ul);
-         /*
-         IF NOT nosquelch & rxx[j].squelch THEN
-             Werr(" "); FixToStr(squelchs[j].medmed*(1.0/SAMPSIZE), 3, s);
-                Werr(s);
-         END;
-         */
+         /* append smoothed FM noise metric for YogyFeeder squelch bar */
+         osi_Werr(":", 2ul);
+         aprsstr_FixToStr(squelchs[j].medmed, 2UL, s, 31ul);
+         osi_Werr(s, 31ul);
          if (rxx[j].modulation=='f') {
             osi_Werr(" ", 2ul);
             aprsstr_IntToStr(rxx[j].afckhz, 0UL, s, 31ul);
