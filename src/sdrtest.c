@@ -1710,12 +1710,15 @@ extern int main(int argc, char **argv)
                            }
                            anysqopen = 1;
                         }
+                        /* always compute medmed so noise metric is reported in -v output */
+                        if (rxx[ix].modulation!='s') {
+                           anonym->medmed = anonym->medmed+(rxx[ix]
+                .sqsum-anonym->medmed)*0.1f;
+                        }
                         if (nosquelch || rxx[ix].modulation=='s') {
                            anonym->mutlev = 1.0f;
                         }
                         else {
-                           anonym->medmed = anonym->medmed+(rxx[ix]
-                .sqsum-anonym->medmed)*0.1f;
                            anonym->mutlev = (anonym->lev-anonym->medmed)
                 *0.3125f;
                            if (anonym->mutlev<0.0f) {
